@@ -4,12 +4,13 @@ import '../../../../core/core.dart';
 import '../../domain/domain.dart';
 
 class DeleteExampleUseCase extends UseCase<ExampleEntity, int> {
+  DeleteExampleUseCase({required ExampleRepository repository})
+    : _repository = repository;
+
   final ExampleRepository _repository;
 
-  DeleteExampleUseCase({required this._repository});
-
   @override
-  Future<Either<Failure, ExampleEntity>> call(int params) async {
-    return await _repository.deleteExample(id: params);
+  Future<Either<Failure, ExampleEntity>> call(int params) {
+    return _repository.deleteExample(id: params);
   }
 }

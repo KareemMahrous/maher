@@ -8,7 +8,7 @@ abstract class UseCase<Input, Params> {
 }
 
 class NoParams extends Equatable {
-  const NoParams._();
+  const NoParams();
 
   @override
   List<Object?> get props => [];

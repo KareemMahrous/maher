@@ -1,12 +1,14 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/core.dart';
+import '../../../../core/network/error_handler.dart';
+import '../../../../core/network/failures.dart';
 import '../../example.dart';
 
 class ExampleRepositoryImpl implements ExampleRepository {
+  ExampleRepositoryImpl({required ExampleRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
+
   final ExampleRemoteDataSource _remoteDataSource;
-  
-  ExampleRepositoryImpl({required this._remoteDataSource});
 
   @override
   Future<Either<Failure, ExampleEntity>> fetchExamples() async {
@@ -25,7 +27,9 @@ class ExampleRepositoryImpl implements ExampleRepository {
   }
 
   @override
-  Future<Either<Failure, ExampleEntity>> deleteExample({required int id}) async {
+  Future<Either<Failure, ExampleEntity>> deleteExample({
+    required int id,
+  }) async {
     try {
       final response = await _remoteDataSource.deleteExample(id: id);
       final data = response.data;
@@ -41,7 +45,9 @@ class ExampleRepositoryImpl implements ExampleRepository {
   }
 
   @override
-  Future<Either<Failure, ExampleEntity>> updateExample({required ExampleParamsEntity input}) async {
+  Future<Either<Failure, ExampleEntity>> updateExample({
+    required ExampleParamsEntity input,
+  }) async {
     try {
       final response = await _remoteDataSource.updateExample(input: input);
       final data = response.data;
@@ -57,7 +63,9 @@ class ExampleRepositoryImpl implements ExampleRepository {
   }
 
   @override
-  Future<Either<Failure, ExampleEntity>> createExample({required ExampleParamsEntity input}) async {
+  Future<Either<Failure, ExampleEntity>> createExample({
+    required ExampleParamsEntity input,
+  }) async {
     try {
       final response = await _remoteDataSource.createExample(input: input);
       final data = response.data;
@@ -73,7 +81,9 @@ class ExampleRepositoryImpl implements ExampleRepository {
   }
 
   @override
-  Future<Either<Failure, ExampleEntity>> fetchExampleDetails({required int id}) async {
+  Future<Either<Failure, ExampleEntity>> fetchExampleDetails({
+    required int id,
+  }) async {
     try {
       final response = await _remoteDataSource.fetchExampleDetails(id: id);
       final data = response.data;

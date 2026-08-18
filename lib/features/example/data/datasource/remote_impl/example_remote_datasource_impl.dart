@@ -2,9 +2,9 @@ import '../../../../../core/core.dart';
 import '../../../example.dart';
 
 class ExampleRemoteDataSourceImpl implements ExampleRemoteDataSource {
-  final BaseDio _baseDio;
+  ExampleRemoteDataSourceImpl({required BaseDio baseDio}) : _baseDio = baseDio;
 
-  ExampleRemoteDataSourceImpl({required this._baseDio});
+  final BaseDio _baseDio;
 
   @override
   Future<ResponseHandler> fetchExamples() async {
@@ -13,7 +13,9 @@ class ExampleRemoteDataSourceImpl implements ExampleRemoteDataSource {
   }
 
   @override
-  Future<ResponseHandler> createExample({required ExampleParamsEntity input}) async {
+  Future<ResponseHandler> createExample({
+    required ExampleParamsEntity input,
+  }) async {
     final inputData = ExampleParamsModel.fromParams(input);
     final response = await _baseDio.post(
       EndPoints.createExample,
@@ -25,19 +27,21 @@ class ExampleRemoteDataSourceImpl implements ExampleRemoteDataSource {
   @override
   Future<ResponseHandler> deleteExample({required int id}) async {
     final response = await _baseDio.delete(
-    EndPoints.deleteExample,
-    queryParameters: {'id': id},
+      EndPoints.deleteExample,
+      queryParameters: {'id': id},
     );
     return ResponseHandler.fromJson(response.data);
   }
 
   @override
-  Future<ResponseHandler> updateExample({required ExampleParamsEntity input}) async {
+  Future<ResponseHandler> updateExample({
+    required ExampleParamsEntity input,
+  }) async {
     final inputData = ExampleParamsModel.fromParams(input);
     final response = await _baseDio.put(
       EndPoints.updateExample,
       data: inputData.toJson(),
-      );
+    );
     return ResponseHandler.fromJson(response.data);
   }
 
@@ -45,9 +49,8 @@ class ExampleRemoteDataSourceImpl implements ExampleRemoteDataSource {
   Future<ResponseHandler> fetchExampleDetails({required int id}) async {
     final response = await _baseDio.get(
       EndPoints.exampleDetails,
-      queryParameters: {'id': id}
-      );
+      queryParameters: {'id': id},
+    );
     return ResponseHandler.fromJson(response.data);
   }
-
 }

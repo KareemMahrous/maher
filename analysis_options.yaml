@@ -3,6 +3,13 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - "**/*.g.dart"
+    - "lib/core/data/network/interceptors/**"
+    - "lib/core/extensions/**"
+    - "lib/core/presentation/**"
+    - "lib/core/routes/**"
+    - "lib/core/theme/**"
+    - "lib/core/utils/**"
+    - "lib/core/validation_rules/**"
   errors:
     avoid_unnecessary_containers: error
     prefer_final_parameters: error

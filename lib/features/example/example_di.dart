@@ -1,7 +1,9 @@
-import '../../di_container.dart';
+import '../../injection_container.dart';
 import 'example.dart';
 
 class ExampleDi {
+  static final getIt = InjectionContainer.locator;
+
   static void injectionContainer() {
     registerSingletons();
     registerFactories();
@@ -9,37 +11,55 @@ class ExampleDi {
 
   static void registerSingletons() {
     // register Remote Data Source
-    getIt.registerSingleton<ExampleRemoteDataSource>(
-      ExampleRemoteDataSourceImpl(baseDio: getIt()),
-    );
+    if (!getIt.isRegistered<ExampleRemoteDataSource>()) {
+      getIt.registerLazySingleton<ExampleRemoteDataSource>(
+        () => ExampleRemoteDataSourceImpl(baseDio: getIt()),
+      );
+    }
 
     // register Repository
-    getIt.registerSingleton<ExampleRepository>(
-      ExampleRepositoryImpl(remoteDataSource: getIt()),
-    );
+    if (!getIt.isRegistered<ExampleRepository>()) {
+      getIt.registerLazySingleton<ExampleRepository>(
+        () => ExampleRepositoryImpl(remoteDataSource: getIt()),
+      );
+    }
 
     // register Use Cases
-    getIt.registerSingleton<FetchExamplesUseCase>(
-      FetchExamplesUseCase(repository: getIt()),
-    );
-    getIt.registerSingleton<FetchExampleDetailsUseCase>(
-      FetchExampleDetailsUseCase(repository: getIt()),
-    );
-    getIt.registerSingleton<UpdateExampleUseCase>(
-      UpdateExampleUseCase(repository: getIt()),
-    );
-    getIt.registerSingleton<CreateExampleUseCase>(
-      CreateExampleUseCase(repository: getIt()),
-    );
-    getIt.registerSingleton<DeleteExampleUseCase>(
-      DeleteExampleUseCase(repository: getIt()),
-    );
+    if (!getIt.isRegistered<FetchExamplesUseCase>()) {
+      getIt.registerLazySingleton<FetchExamplesUseCase>(
+        () => FetchExamplesUseCase(repository: getIt()),
+      );
+    }
+    if (!getIt.isRegistered<FetchExampleDetailsUseCase>()) {
+      getIt.registerLazySingleton<FetchExampleDetailsUseCase>(
+        () => FetchExampleDetailsUseCase(repository: getIt()),
+      );
+    }
+    if (!getIt.isRegistered<UpdateExampleUseCase>()) {
+      getIt.registerLazySingleton<UpdateExampleUseCase>(
+        () => UpdateExampleUseCase(repository: getIt()),
+      );
+    }
+    if (!getIt.isRegistered<CreateExampleUseCase>()) {
+      getIt.registerLazySingleton<CreateExampleUseCase>(
+        () => CreateExampleUseCase(repository: getIt()),
+      );
+    }
+    if (!getIt.isRegistered<DeleteExampleUseCase>()) {
+      getIt.registerLazySingleton<DeleteExampleUseCase>(
+        () => DeleteExampleUseCase(repository: getIt()),
+      );
+    }
   }
 
   static void registerFactories() {
-       // register Cubit
+    // register Cubit
+    if (getIt.isRegistered<ExamplesCubit>()) {
+      return;
+    }
     getIt.registerFactory<ExamplesCubit>(
-      () => ExamplesCubit(fetchExamplesUseCase: getIt()));
+      () => ExamplesCubit(fetchExamplesUseCase: getIt()),
+    );
     getIt.registerFactory<ExampleDetailsCubit>(
       () => ExampleDetailsCubit(fetchExampleDetailsUseCase: getIt()),
     );

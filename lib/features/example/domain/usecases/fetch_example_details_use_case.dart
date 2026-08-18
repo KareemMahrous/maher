@@ -4,12 +4,13 @@ import '../../../../core/core.dart';
 import '../../domain/domain.dart';
 
 class FetchExampleDetailsUseCase extends UseCase<ExampleEntity, int> {
+  FetchExampleDetailsUseCase({required ExampleRepository repository})
+    : _repository = repository;
+
   final ExampleRepository _repository;
 
-  FetchExampleDetailsUseCase({required this._repository});
-
   @override
-  Future<Either<Failure, ExampleEntity>> call(int params) async {
-    return await _repository.fetchExampleDetails(id: params);
+  Future<Either<Failure, ExampleEntity>> call(int params) {
+    return _repository.fetchExampleDetails(id: params);
   }
 }

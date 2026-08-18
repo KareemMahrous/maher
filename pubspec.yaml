@@ -4,13 +4,14 @@ publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: ^3.12.1
+  sdk: ^3.11.1
 
 dependencies:
   flutter:
     sdk: flutter
   equatable: 
   dartz:
+  ffmpeg_kit_flutter_new_audio:
   flutter_bloc:
   flutter_svg:
   get_it:
@@ -19,13 +20,21 @@ dependencies:
   fluttertoast:
   shared_preferences:
   auto_route:
-  formz: ^0.8.1
-  loader_overlay: ^5.0.0
+  formz:
+  loader_overlay:
+  flutter_foreground_task:
+  path_provider:
+  record:
+  wakelock_plus:
 
 dev_dependencies:
+  auto_route_generator:
+  build_runner:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
 flutter:
+  config:
+    enable-swift-package-manager: false
   uses-material-design: true

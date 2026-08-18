@@ -1,16 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../app/app.dart';
 import '../../../domain/domain.dart';
 
 part 'example_details_state.dart';
 
 class ExampleDetailsCubit extends Cubit<ExampleDetailsState> {
-  final FetchExampleDetailsUseCase _fetchExampleDetailsUseCase;
+  ExampleDetailsCubit({
+    required FetchExampleDetailsUseCase fetchExampleDetailsUseCase,
+  }) : _fetchExampleDetailsUseCase = fetchExampleDetailsUseCase,
+       super(ExampleDetailsInitial());
 
-  ExampleDetailsCubit({required this._fetchExampleDetailsUseCase}) :
-        super(ExampleDetailsInitial());
+  final FetchExampleDetailsUseCase _fetchExampleDetailsUseCase;
 
   Future<void> fetchExampleDetails({required int id}) async {
     emit(ExampleDetailsLoading());

@@ -2,16 +2,16 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/core.dart';
-import '../../../app/app.dart';
 import '../../../domain/domain.dart';
 
 part 'examples_state.dart';
 
 class ExamplesCubit extends Cubit<ExamplesState> {
-  final FetchExamplesUseCase _fetchExamplesUseCase;
+  ExamplesCubit({required FetchExamplesUseCase fetchExamplesUseCase})
+    : _fetchExamplesUseCase = fetchExamplesUseCase,
+      super(ExampleInitial());
 
-  ExamplesCubit({required this._fetchExamplesUseCase}):
-        super(ExampleInitial());
+  final FetchExamplesUseCase _fetchExamplesUseCase;
 
   Future<void> fetchExamples() async {
     emit(ExampleLoading());

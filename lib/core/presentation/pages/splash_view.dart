@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 
 import '../../core.dart';
 
-@RoutePage()
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
 

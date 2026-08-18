@@ -11,7 +11,6 @@ import '../widgets/bottom_sheet/bottom_sheet_widget.dart';
 import '../widgets/drawers/drawer_boxes.dart';
 import '../widgets/error_widget/illustration_widget.dart';
 
-@RoutePage()
 class LayoutView extends StatefulWidget {
   const LayoutView({super.key});
 

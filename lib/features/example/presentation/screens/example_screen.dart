@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/core.dart';
 import '../cubit/cubit.dart';
 
 class ExampleScreen extends StatefulWidget {
@@ -21,9 +20,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const DefaultText('Example'),
-      ),
+      appBar: AppBar(title: const Text('Example')),
       body: BlocBuilder<ExamplesCubit, ExamplesState>(
         builder: (context, state) {
           if (state is ExampleLoading) {

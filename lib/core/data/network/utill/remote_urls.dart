@@ -166,3 +166,11 @@ class RemoteURLs {
   static const getUsersByDepartmentPath =
       "MobileUser/GetAllUsersByDepartmentListPaggedList";
 }
+
+class EndPoints {
+  static const examples = 'examples';
+  static const exampleDetails = 'examples/details';
+  static const createExample = 'examples/create';
+  static const updateExample = 'examples/update';
+  static const deleteExample = 'examples/delete';
+}
