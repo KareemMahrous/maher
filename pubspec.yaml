@@ -1,0 +1,31 @@
+name: maher
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  equatable: 
+  dartz:
+  flutter_bloc:
+  flutter_svg:
+  get_it:
+  dio:
+  skeletonizer:
+  fluttertoast:
+  shared_preferences:
+  auto_route:
+  formz: ^0.8.1
+  loader_overlay: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,1 @@
+enum StandardValidationError { invalid }
