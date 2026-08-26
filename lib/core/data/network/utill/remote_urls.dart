@@ -1,5 +1,6 @@
 class RemoteURLs {
   static const loginPath = "m/MobileAccount/Login";
+  static const googleLoginPath = "TODO_ADD_GOOGLE_LOGIN_ENDPOINT";
   static const forgetPasswordPath = "m/MobileAccount/SendResetPasswordOTP";
   static const verifyOtpPath = "m/MobileAccount/VerifyResetPasswordOTP";
   static const changePasswordPath = "m/MobileAccount/ResetPassword";

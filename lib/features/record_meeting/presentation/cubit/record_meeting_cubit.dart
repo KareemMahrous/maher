@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_audio/return_code.dart';
 import 'package:flutter/widgets.dart';
@@ -40,6 +42,9 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
 
   final AudioRecorder _recorder = AudioRecorder();
   String? _activeRecordPath;
+  Timer? _elapsedTimer;
+  DateTime? _activeElapsedSegmentStartedAt;
+  Duration _elapsedBeforeActiveSegment = Duration.zero;
 
   Future<void> startRecord() async {
     if (await _recorder.isRecording()) {
@@ -65,8 +70,17 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
       );
 
       _activeRecordPath = recordPath;
-      emit(StartRecordMeeting(recordPath: recordPath));
+      _resetElapsedDuration();
+      _activeElapsedSegmentStartedAt = DateTime.now();
+      emit(
+        StartRecordMeeting(
+          recordPath: recordPath,
+          elapsedDuration: Duration.zero,
+        ),
+      );
+      _startElapsedTimer();
     } catch (_) {
+      _resetElapsedDuration();
       await _stopRecordingProtection();
       emit(const RecordMeetingState());
     }
@@ -78,12 +92,16 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
     }
 
     await _recorder.pause();
-    emit(const PauseRecordMeeting());
+    _freezeElapsedDuration();
+    _stopElapsedTicker();
+    emit(PauseRecordMeeting(elapsedDuration: _elapsedDuration));
   }
 
   Future<void> resumeRecord() async {
     await _recorder.resume();
-    emit(const ResumeRecordMeeting());
+    _activeElapsedSegmentStartedAt = DateTime.now();
+    emit(ResumeRecordMeeting(elapsedDuration: _elapsedDuration));
+    _startElapsedTimer();
   }
 
   Future<void> finishRecord() async {
@@ -91,6 +109,9 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
       return;
     }
 
+    _freezeElapsedDuration();
+    _stopElapsedTicker();
+    final finalElapsedDuration = _elapsedDuration;
     emit(FinishingRecordState(recordPath: _activeRecordPath));
     final recordPath = await _safeStopRecorder();
     final mp3Path = await _convertRecordToMp3(recordPath);
@@ -99,12 +120,32 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
     if (mp3Path == null) {
       emit(
         const ErrorRecordMeetingState(
-          message: 'Could not save the meeting record. Please try again.',
+          messageKey: 'recordMeeting.snackbar.saveError',
         ),
       );
     } else {
-      emit(FinishRecordMeeting(recordPath: mp3Path));
+      emit(
+        FinishRecordMeeting(
+          recordPath: mp3Path,
+          elapsedDuration: finalElapsedDuration,
+        ),
+      );
     }
+    emit(const RecordMeetingState());
+  }
+
+  Future<void> discardRecord() async {
+    if (state is FinishingRecordState) {
+      return;
+    }
+
+    _freezeElapsedDuration();
+    _resetElapsedDuration();
+    final stoppedRecordPath = await _safeStopRecorder();
+    final recordPath = stoppedRecordPath ?? _activeRecordPath;
+    await _deleteRecordFile(recordPath);
+    await _stopRecordingProtection();
+    _activeRecordPath = null;
     emit(const RecordMeetingState());
   }
 
@@ -116,8 +157,8 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
 
       if (await FlutterForegroundTask.isRunningService) {
         await FlutterForegroundTask.updateService(
-          notificationTitle: 'Recording meeting',
-          notificationText: 'Meeting recording is still running.',
+          notificationTitle: 'recordMeeting.foreground.title'.tr(),
+          notificationText: 'recordMeeting.foreground.text'.tr(),
         );
         return;
       }
@@ -125,8 +166,8 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
       final result = await FlutterForegroundTask.startService(
         serviceId: 1001,
         serviceTypes: const [ForegroundServiceTypes.microphone],
-        notificationTitle: 'Recording meeting',
-        notificationText: 'Meeting recording is still running.',
+        notificationTitle: 'recordMeeting.foreground.title'.tr(),
+        notificationText: 'recordMeeting.foreground.text'.tr(),
         notificationInitialRoute: '/record-meeting',
         callback: recordMeetingForegroundTaskCallback,
       );
@@ -136,6 +177,53 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
         throw result.error;
       }
     }
+  }
+
+  void _startElapsedTimer() {
+    _stopElapsedTicker();
+    _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _emitElapsedDuration();
+    });
+  }
+
+  void _stopElapsedTicker() {
+    _elapsedTimer?.cancel();
+    _elapsedTimer = null;
+  }
+
+  void _freezeElapsedDuration() {
+    _elapsedBeforeActiveSegment = _elapsedDuration;
+    _activeElapsedSegmentStartedAt = null;
+  }
+
+  void _resetElapsedDuration() {
+    _stopElapsedTicker();
+    _elapsedBeforeActiveSegment = Duration.zero;
+    _activeElapsedSegmentStartedAt = null;
+  }
+
+  void _emitElapsedDuration() {
+    final currentState = state;
+    if (currentState is StartRecordMeeting) {
+      emit(
+        StartRecordMeeting(
+          recordPath: currentState.recordPath,
+          elapsedDuration: _elapsedDuration,
+        ),
+      );
+    } else if (currentState is ResumeRecordMeeting) {
+      emit(ResumeRecordMeeting(elapsedDuration: _elapsedDuration));
+    }
+  }
+
+  Duration get _elapsedDuration {
+    final activeSegmentStartedAt = _activeElapsedSegmentStartedAt;
+    if (activeSegmentStartedAt == null) {
+      return _elapsedBeforeActiveSegment;
+    }
+
+    return _elapsedBeforeActiveSegment +
+        DateTime.now().difference(activeSegmentStartedAt);
   }
 
   Future<void> _stopRecordingProtection() async {
@@ -161,9 +249,8 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'record_meeting_service',
-        channelName: 'Meeting Recording',
-        channelDescription:
-            'Keeps meeting recording active while the phone is locked.',
+        channelName: 'recordMeeting.foreground.channelName'.tr(),
+        channelDescription: 'recordMeeting.foreground.channelDescription'.tr(),
         onlyAlertOnce: true,
       ),
       iosNotificationOptions: const IOSNotificationOptions(
@@ -196,10 +283,13 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.resumed) {
       WakelockPlus.enable();
+      if (state == AppLifecycleState.resumed) {
+        _emitElapsedDuration();
+      }
       if (Platform.isAndroid) {
         FlutterForegroundTask.updateService(
-          notificationTitle: 'Recording meeting',
-          notificationText: 'Meeting recording is still running.',
+          notificationTitle: 'recordMeeting.foreground.title'.tr(),
+          notificationText: 'recordMeeting.foreground.text'.tr(),
         );
       }
     }
@@ -262,11 +352,28 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
       return mp3Path;
     }
 
+    final failStackTrace = await session.getFailStackTrace();
+    final output = await session.getOutput();
     log(
-      'MP3 conversion failed. Temporary record remains at: $sourcePath',
+      'MP3 conversion failed. Return code: $returnCode. '
+      'Temporary record remains at: $sourcePath. '
+      'FFmpeg output: $output. '
+      'Fail stack trace: $failStackTrace',
       name: 'RecordMeetingCubit',
     );
     return null;
+  }
+
+  Future<void> _deleteRecordFile(String? path) async {
+    if (path == null || path.isEmpty) {
+      return;
+    }
+
+    final file = File(path);
+    if (file.existsSync()) {
+      await file.delete();
+      log('Discarded record file at: $path', name: 'RecordMeetingCubit');
+    }
   }
 
   String _quotePath(String path) {
@@ -284,6 +391,7 @@ class RecordMeetingCubit extends Cubit<RecordMeetingState>
   @override
   Future<void> close() async {
     WidgetsBinding.instance.removeObserver(this);
+    _stopElapsedTicker();
     if (_activeRecordPath != null) {
       await _safeStopRecorder();
       await _stopRecordingProtection();

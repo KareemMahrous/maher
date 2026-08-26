@@ -8,20 +8,34 @@ class RecordMeetingState extends Equatable {
 }
 
 class StartRecordMeeting extends RecordMeetingState {
-  const StartRecordMeeting({required this.recordPath});
+  const StartRecordMeeting({
+    required this.recordPath,
+    required this.elapsedDuration,
+  });
 
   final String recordPath;
+  final Duration elapsedDuration;
 
   @override
-  List<Object?> get props => [recordPath];
+  List<Object?> get props => [recordPath, elapsedDuration];
 }
 
 class PauseRecordMeeting extends RecordMeetingState {
-  const PauseRecordMeeting();
+  const PauseRecordMeeting({required this.elapsedDuration});
+
+  final Duration elapsedDuration;
+
+  @override
+  List<Object?> get props => [elapsedDuration];
 }
 
 class ResumeRecordMeeting extends RecordMeetingState {
-  const ResumeRecordMeeting();
+  const ResumeRecordMeeting({required this.elapsedDuration});
+
+  final Duration elapsedDuration;
+
+  @override
+  List<Object?> get props => [elapsedDuration];
 }
 
 class FinishingRecordState extends RecordMeetingState {
@@ -36,21 +50,23 @@ class FinishingRecordState extends RecordMeetingState {
 class FinishRecordMeeting extends RecordMeetingState {
   const FinishRecordMeeting({
     required this.recordPath,
-    this.message = 'Meeting record saved successfully.',
+    required this.elapsedDuration,
+    this.messageKey = 'recordMeeting.snackbar.saveSuccess',
   });
 
   final String? recordPath;
-  final String message;
+  final Duration elapsedDuration;
+  final String messageKey;
 
   @override
-  List<Object?> get props => [recordPath, message];
+  List<Object?> get props => [recordPath, elapsedDuration, messageKey];
 }
 
 class ErrorRecordMeetingState extends RecordMeetingState {
-  const ErrorRecordMeetingState({required this.message});
+  const ErrorRecordMeetingState({required this.messageKey});
 
-  final String message;
+  final String messageKey;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [messageKey];
 }

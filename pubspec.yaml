@@ -11,10 +11,12 @@ dependencies:
     sdk: flutter
   equatable: 
   dartz:
+  easy_localization: ^3.0.8
   ffmpeg_kit_flutter_new_audio:
   flutter_bloc:
   flutter_svg:
   get_it:
+  google_sign_in: ^7.2.0
   dio:
   skeletonizer:
   fluttertoast:
@@ -30,6 +32,7 @@ dependencies:
 dev_dependencies:
   auto_route_generator:
   build_runner:
+  flutter_native_splash: ^2.4.7
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
@@ -38,3 +41,14 @@ flutter:
   config:
     enable-swift-package-manager: false
   uses-material-design: true
+  assets:
+    - assets/translations/
+
+flutter_native_splash:
+  background_image: assets/splash/splash.png
+  android_gravity: fill
+  ios_content_mode: scaleAspectFill
+  web: false
+  android_12:
+    color: "#1A417F"
+    image: assets/splash/android12_logo.png

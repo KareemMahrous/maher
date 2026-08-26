@@ -1,0 +1,38 @@
+{
+  "app": {
+    "title": "Maher"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "googleButton": "Continue with Google",
+      "googleError": "Could not login with Google. Please try again.",
+      "googleCanceled": "Google login was canceled."
+    }
+  },
+  "recordMeeting": {
+    "title": "Record Meeting",
+    "actions": {
+      "close": "Close meeting",
+      "finish": "Finish record",
+      "pause": "Pause",
+      "resume": "Resume"
+    },
+    "dialog": {
+      "closeTitle": "Close meeting?",
+      "closeMessage": "This will stop recording and delete this meeting record.",
+      "no": "No",
+      "yesClose": "Yes, close"
+    },
+    "snackbar": {
+      "saveSuccess": "Meeting record saved successfully.",
+      "saveError": "Could not save the meeting record. Please try again."
+    },
+    "foreground": {
+      "title": "Recording meeting",
+      "text": "Meeting recording is still running.",
+      "channelName": "Meeting Recording",
+      "channelDescription": "Keeps meeting recording active while the phone is locked."
+    }
+  }
+}
