@@ -8,11 +8,68 @@
 - Resolved SDKs from `pubspec.lock`:
   - Dart: `>=3.11.1 <4.0.0`
   - Flutter: `>=3.41.0`
-- Main app entry: `lib/main.dart`
+- Default production app entry: `lib/main.dart`
+- Flavor app entries:
+  - `lib/main_development.dart`
+  - `lib/main_staging.dart`
+  - `lib/main_production.dart`
 - First Flutter screen after app launch: `AuthGateView`
 - Startup navigation:
   - if `PrefKeys.isUserLoggedIn == true`, go to `RecordMeetingView`
   - otherwise, go to `LoginView`
+
+## Environment And Networking
+
+The project uses a small `BuildConfig` flavor layer, following the referenced
+CTS-style environment pattern without copying its endpoint list.
+
+Flavor entrypoints:
+
+```text
+lib/main.dart              -> production default
+lib/main_development.dart  -> Flavor.development
+lib/main_staging.dart      -> Flavor.staging
+lib/main_production.dart   -> Flavor.production
+```
+
+`lib/main.dart` exposes `bootstrap(Flavor flavor)` so every environment uses
+the same Flutter, localization, shared preferences, and foreground-task
+startup path.
+
+Current base URL:
+
+```dart
+BuildConfig.of().baseURL = 'https://zk.com/'
+```
+
+Current endpoint constants are intentionally minimal:
+
+```dart
+RemoteURLs.loginByGoogle = 'login/loginByGoogle'
+```
+
+`RemoteURLs.loginPath`, `logoutPath`, and `refreshTokenPath` are also kept
+because the token interceptor needs auth-exempt path checks.
+
+`EndPoints.*` currently contains only placeholder `example` values so the
+generated/example data source still analyzes cleanly without restoring the old
+copied endpoint list.
+
+`BaseDio` now reads its base URL from `BuildConfig.of().baseURL` and sets
+default JSON headers:
+
+```text
+Accept: application/json
+Content-Type: application/json
+```
+
+The token-refresh retry Dio in `ValidateTokenInterceptor` uses the same base
+URL and JSON headers so retried authenticated requests behave like normal
+network-service requests.
+
+Development-like flavors enable Dio's built-in `LogInterceptor`, but request
+and response bodies are disabled so Google tokens and sensitive payloads are
+not printed during normal debugging.
 
 ## Architecture
 
@@ -118,6 +175,33 @@ SharedPref.getBoolean(PrefKeys.isUserLoggedIn) ?? false
   - emits success or localized error state
 - On login success, `LoginView` navigates to `RecordMeetingViewRoute`.
 
+Current login UI:
+
+- `LoginView` uses a custom full-screen white login layout matching the Figma
+  direction/screenshot.
+- The app bar is hidden on the login screen.
+- The screen is RTL-first because Arabic is the default language.
+- A soft blue radial glow is placed in the top-left background.
+- The centered brand logo uses:
+
+```text
+assets/auth/login_logo.png
+```
+
+- The decorative bottom pattern uses:
+
+```text
+assets/auth/login_pattern.png
+```
+
+- `LoginWithGoogle` is a custom 56px rounded button with light background,
+  Arabic text, loading state, and a Google mark on the trailing side.
+- Microsoft login text/assets are intentionally not shown yet; only Google
+  login is implemented in this phase.
+- The signup line is localized:
+  - `auth.login.noAccount`
+  - `auth.login.createAccount`
+
 Google Sign-In package:
 
 ```text
@@ -139,10 +223,10 @@ AuthGoogleConfig.backendApiKey
 AuthGoogleConfig.backendApiKeyHeaderName
 ```
 
-Backend endpoint placeholder:
+Backend endpoint:
 
 ```dart
-RemoteURLs.googleLoginPath = "TODO_ADD_GOOGLE_LOGIN_ENDPOINT"
+RemoteURLs.loginByGoogle = "login/loginByGoogle"
 ```
 
 Backend request payload:
@@ -166,8 +250,9 @@ Important auth notes and risks:
   `com.maher.app` and the correct SHA fingerprints.
 - iOS may require the iOS OAuth client ID and URL scheme setup depending on the
   final Google configuration method.
-- The backend endpoint is still a placeholder; login cannot succeed against the
-  API until `RemoteURLs.googleLoginPath` is replaced.
+- The backend endpoint example is now `login/loginByGoogle` under base URL
+  `https://zk.com/`; update only `RemoteURLs.loginByGoogle` when the real path
+  changes.
 - If the backend requires a custom API key/header, fill
   `AuthGoogleConfig.backendApiKey` and `backendApiKeyHeaderName`.
 - The shared-pref login flag is written only after the backend accepts the
@@ -817,6 +902,21 @@ Generated native files include:
   - `ios/Runner/Assets.xcassets/LaunchImage.imageset/*`
   - `ios/Runner/Base.lproj/LaunchScreen.storyboard`
   - `ios/Runner/Info.plist`
+
+iOS simulator black splash fix:
+
+- `flutter_native_splash` generated `LaunchImage.png`,
+  `LaunchImage@2x.png`, and `LaunchImage@3x.png` as 1x1 black placeholder
+  images.
+- `ios/Runner/Base.lproj/LaunchScreen.storyboard` had a `LaunchImage`
+  image view layered above `LaunchBackground`.
+- Because the placeholder image view was constrained to every screen edge, iOS
+  stretched that 1x1 black pixel over the real splash artwork, so the simulator
+  showed a black splash screen.
+- The storyboard was manually adjusted to remove the `LaunchImage` overlay and
+  render only `LaunchBackground` with `scaleAspectFill`.
+- If `dart run flutter_native_splash:create` is run again, re-check
+  `LaunchScreen.storyboard`; the generator may recreate the placeholder overlay.
 
 Generation command:
 

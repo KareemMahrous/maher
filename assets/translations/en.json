@@ -5,7 +5,10 @@
   "auth": {
     "login": {
       "title": "Login",
-      "googleButton": "Continue with Google",
+      "googleButton": "Login with Google",
+      "microsoftButton": "Login with Microsoft",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
       "googleError": "Could not login with Google. Please try again.",
       "googleCanceled": "Google login was canceled."
     }

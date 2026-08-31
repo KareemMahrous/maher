@@ -43,6 +43,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/translations/
+    - assets/auth/
+    - assets/splash/
 
 flutter_native_splash:
   background_image: assets/splash/splash.png

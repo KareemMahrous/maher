@@ -4,12 +4,23 @@ import 'utill/build_config.dart';
 
 class BaseDio {
   BaseDio({Dio? dio}) : _dio = dio ?? Dio() {
+    final buildConfig = BuildConfig.of();
     _dio.options = BaseOptions(
-      baseUrl: BuildConfig.of().baseURL,
+      baseUrl: buildConfig.baseURL,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       receiveDataWhenStatusError: true,
+      headers: const {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
     );
+
+    if (buildConfig.showLogger) {
+      _dio.interceptors.add(
+        LogInterceptor(requestBody: false, responseBody: false),
+      );
+    }
   }
 
   final Dio _dio;

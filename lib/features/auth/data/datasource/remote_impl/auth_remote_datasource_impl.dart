@@ -20,7 +20,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     };
 
     final response = await _networkService.request(
-      RemoteURLs.googleLoginPath,
+      RemoteURLs.loginByGoogle,
       httpMethod: HttpMethod.post,
       data: request.toJson(),
       headers: headers.isEmpty ? null : headers,

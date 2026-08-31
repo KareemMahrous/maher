@@ -5,8 +5,11 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'core/core.dart';
 import 'core/routes/app_router.dart';
 
-void main() async {
+Future<void> main() => bootstrap(Flavor.production);
+
+Future<void> bootstrap(Flavor flavor) async {
   WidgetsFlutterBinding.ensureInitialized();
+  BuildConfig.setFlavor(flavor);
   await EasyLocalization.ensureInitialized();
   await SharedPref.instantiatePreferences();
   FlutterForegroundTask.initCommunicationPort();

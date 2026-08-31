@@ -5,7 +5,10 @@
   "auth": {
     "login": {
       "title": "تسجيل الدخول",
-      "googleButton": "المتابعة باستخدام Google",
+      "googleButton": "الدخول عبر حساب جوجل",
+      "microsoftButton": "الدخول عبر مايكروسوفت",
+      "noAccount": "ليس لديك حساب؟",
+      "createAccount": "حساب جديد",
       "googleError": "تعذر تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى.",
       "googleCanceled": "تم إلغاء تسجيل الدخول باستخدام Google."
     }

@@ -1,15 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 enum Flavor { development, production, preProduction, staging }
 
 class BuildConfig {
-  static SharedPreferences? _prefs;
-
-  static Future<void> init() async {
-    _prefs ??= await SharedPreferences.getInstance();
-    _instance = null; // force re-creation on next of()
-  }
-
   factory BuildConfig() {
     _instance ??= BuildConfig.of();
     return _instance!;
@@ -18,7 +9,6 @@ class BuildConfig {
   BuildConfig._({
     required this.baseURL,
     required this.baseImageUrl,
-
     required this.showLogger,
     required this.showVersionCode,
     required this.testingDeviceId,
@@ -39,46 +29,47 @@ class BuildConfig {
     return _instance!;
   }
 
+  static void setFlavor(Flavor value) {
+    flavor = value;
+    _instance = null;
+  }
+
   factory BuildConfig._production() {
-    final savedUrl = _prefs?.getString('url');
     return BuildConfig._(
-      baseURL: (savedUrl != null && savedUrl.isNotEmpty) ? savedUrl : 'https://ucts-be.psmail.gov/api/',
-      baseImageUrl: 'https://',
+      baseURL: _baseUrl,
+      baseImageUrl: _baseUrl,
       showLogger: false,
-      testingDeviceId: 'dss',
+      testingDeviceId: '',
       showVersionCode: false,
     );
   }
 
   factory BuildConfig._development() {
-    final savedUrl = _prefs?.getString('url');
     return BuildConfig._(
-      baseURL: (savedUrl != null && savedUrl.isNotEmpty) ? savedUrl : 'https://morasalatdev-be.ti-sa.com/api/',
-      baseImageUrl: 'https://',
+      baseURL: _baseUrl,
+      baseImageUrl: _baseUrl,
       showLogger: true,
-      testingDeviceId: 'CA660F9D-9416-4007-A097-669D240388D3',
+      testingDeviceId: '',
       showVersionCode: true,
     );
   }
 
   factory BuildConfig._staging() {
-    final savedUrl = _prefs?.getString('url');
     return BuildConfig._(
-      baseURL: (savedUrl != null && savedUrl.isNotEmpty) ? savedUrl : 'https://morasalat-be.ti-sa.com/api/',
-      baseImageUrl: 'https://',
-      showLogger: false,
-      testingDeviceId: 'CA660F9D-9416-4007-A097-669D240388D3',
-      showVersionCode: false,
+      baseURL: _baseUrl,
+      baseImageUrl: _baseUrl,
+      showLogger: true,
+      testingDeviceId: '',
+      showVersionCode: true,
     );
   }
 
   factory BuildConfig._preProduction() {
-    final savedUrl = _prefs?.getString('url');
     return BuildConfig._(
-      baseURL: (savedUrl != null && savedUrl.isNotEmpty) ? savedUrl : 'https://cts-be.preps.local/api/',
-      baseImageUrl: 'https://',
-      showLogger: false,
-      testingDeviceId: 'dss',
+      baseURL: _baseUrl,
+      baseImageUrl: _baseUrl,
+      showLogger: true,
+      testingDeviceId: '',
       showVersionCode: true,
     );
   }
@@ -96,6 +87,7 @@ class BuildConfig {
   }
 
   static BuildConfig? _instance;
+  static const String _baseUrl = 'https://zk.com/';
 
   static Flavor flavor = Flavor.production;
   final String baseURL;
@@ -107,12 +99,12 @@ class BuildConfig {
 
 //Android
 //flutter build apk --release --target lib/main_development.dart
-//flutter build apk --release --target lib/main.dart
 //flutter build apk --release --target lib/main_staging.dart
-//flutter build apk --release --target lib/main_pre_production.dart
+//flutter build apk --release --target lib/main_production.dart
+//flutter build apk --release --target lib/main.dart
 
 //IOS
 //flutter build ipa --release --target lib/main_development.dart
-//flutter build ipa --release --target lib/main.dart
 //flutter build ipa --release --target lib/main_staging.dart
-//flutter build ipa --release --target lib/main_pre_production.dart
+//flutter build ipa --release --target lib/main_production.dart
+//flutter build ipa --release --target lib/main.dart

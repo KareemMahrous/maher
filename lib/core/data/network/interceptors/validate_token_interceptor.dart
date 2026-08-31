@@ -57,8 +57,8 @@ class ValidateTokenInterceptor extends Interceptor {
 
     try {
       // Force refresh — server already rejected the current access token.
-      final newToken =
-          await InjectionContainer.locator<TokenRefreshService>().refresh();
+      final newToken = await InjectionContainer.locator<TokenRefreshService>()
+          .refresh();
       if (newToken == null || newToken.isEmpty) {
         await _forceLogout();
         handler.next(err);
@@ -111,6 +111,10 @@ class ValidateTokenInterceptor extends Interceptor {
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         receiveDataWhenStatusError: true,
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
       ),
     );
     dio.httpClientAdapter = IOHttpClientAdapter(
