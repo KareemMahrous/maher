@@ -3,8 +3,7 @@ import 'package:msal_auth/msal_auth.dart';
 class AuthMicrosoftConfig {
   const AuthMicrosoftConfig._();
 
-  // TODO: Add Microsoft Azure application client ID.
-  static const clientId = 'TODO_ADD_MICROSOFT_CLIENT_ID';
+  static const clientId = '313f1f6e-186a-44d2-9abe-bf79f2b31bfb';
 
   // TODO: Add Android redirect URI from Azure, for example:
   // msauth://com.maher.app/<BASE64_SIGNATURE_HASH>

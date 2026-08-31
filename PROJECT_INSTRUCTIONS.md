@@ -251,13 +251,28 @@ assets/auth/msal_config.json
 Values to fill before real environment testing:
 
 ```dart
-AuthGoogleConfig.serverClientId
 AuthGoogleConfig.backendApiKey
 AuthGoogleConfig.backendApiKeyHeaderName
-AuthMicrosoftConfig.clientId
 AuthMicrosoftConfig.androidRedirectUri
 AuthMicrosoftConfig.appleRedirectUri
 ```
+
+Configured Microsoft public client ID:
+
+```text
+AuthMicrosoftConfig.clientId =
+313f1f6e-186a-44d2-9abe-bf79f2b31bfb
+```
+
+Microsoft Application secret:
+
+- The Azure Application/client secret must not be stored in Flutter, Android,
+  iOS, or any shipped mobile asset.
+- Mobile apps are public clients; secrets inside APK/IPA files can be extracted.
+- Keep the secret only on the backend if the backend needs to exchange or
+  validate tokens.
+- Because the secret was shared during development, rotate it in Azure before
+  production.
 
 Configured Google OAuth mobile client IDs:
 
@@ -357,7 +372,6 @@ Important Microsoft auth notes and risks:
   `authorization_user_agent: WEBVIEW`.
 - Android now includes `INTERNET` and `ACCESS_NETWORK_STATE` permissions.
 - Before real testing, fill:
-  - Azure application client ID
   - Android redirect URI from Azure
   - iOS redirect URI if the final iOS setup requires an explicit redirect
 - `MicrosoftAuthService` validates the required placeholder values before
