@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'core/core.dart';
 import 'core/routes/app_router.dart';
@@ -15,6 +17,12 @@ Future<void> bootstrap(Flavor flavor) async {
   await EasyLocalization.ensureInitialized();
   await SharedPref.instantiatePreferences();
   FlutterForegroundTask.initCommunicationPort();
+
+
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],

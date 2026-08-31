@@ -251,7 +251,6 @@ assets/auth/msal_config.json
 Values to fill before real environment testing:
 
 ```dart
-AuthGoogleConfig.clientId
 AuthGoogleConfig.serverClientId
 AuthGoogleConfig.backendApiKey
 AuthGoogleConfig.backendApiKeyHeaderName
@@ -259,6 +258,38 @@ AuthMicrosoftConfig.clientId
 AuthMicrosoftConfig.androidRedirectUri
 AuthMicrosoftConfig.appleRedirectUri
 ```
+
+Configured Google OAuth mobile client IDs:
+
+```text
+AuthGoogleConfig.androidClientId =
+22642361348-3pgjqd9sk57b6puuvampepq26goneee0.apps.googleusercontent.com
+
+AuthGoogleConfig.iosClientId =
+22642361348-7i9fds4vr58utkrev2622grni0dcjh13.apps.googleusercontent.com
+```
+
+Configured iOS Google URL scheme:
+
+```text
+GoogleService-Info.plist REVERSED_CLIENT_ID =
+com.googleusercontent.apps.22642361348-7i9fds4vr58utkrev2622grni0dcjh13
+```
+
+This value is registered in `ios/Runner/Info.plist` under
+`CFBundleURLTypes/CFBundleURLSchemes` so iOS can return control to the app after
+Google Sign-In.
+
+Configured Google Web/server OAuth client ID:
+
+```text
+AuthGoogleConfig.serverClientId
+22642361348-p129577ft4ia90ndglmgvfp02gbgjhud.apps.googleusercontent.com
+```
+
+This should be the Web OAuth client ID used by the backend/server side to
+validate Google ID tokens. Do not fill it with another Android client ID unless
+the backend explicitly requires that exact audience.
 
 Backend endpoint:
 
@@ -302,8 +333,8 @@ Important auth notes and risks:
   Google OAuth configuration.
 - Android requires Google Cloud OAuth setup for package name
   `com.maher.app` and the correct SHA fingerprints.
-- iOS may require the iOS OAuth client ID and URL scheme setup depending on the
-  final Google configuration method.
+- iOS has `ios/Runner/GoogleService-Info.plist` and the reversed client ID URL
+  scheme from that file registered in `ios/Runner/Info.plist`.
 - The backend endpoint example is now `login/loginByGoogle` under base URL
   `https://zk.com/`; update only `RemoteURLs.loginByGoogle` when the real path
   changes.
@@ -633,8 +664,11 @@ default because it keeps voices clear while making file size predictable.
 Native minimums required by the MP3 conversion package:
 
 - Android `minSdk = 24`
-- Android Gradle Plugin is set to `8.12.1` and Kotlin Android Gradle plugin is
+- Android Gradle Plugin is set to `8.10.0` and Kotlin Android Gradle plugin is
   set to `2.2.0` in `android/settings.gradle.kts`.
+- AGP was downgraded from `8.12.1` to `8.10.0` because the current Flutter
+  tooling reported `8.12.1` as incompatible and `8.10.0` as the latest
+  supported AGP version.
 - Do not bump Android Gradle Plugin to `9.x` without retesting plugins.
   `package_info_plus 10.2.1` failed under AGP `9.0.1` because its Gradle script
   skipped applying Kotlin for AGP 9 while still configuring
@@ -989,16 +1023,22 @@ Generated native files include:
 
 iOS simulator black splash fix:
 
-- `flutter_native_splash` generated `LaunchImage.png`,
+- `flutter_native_splash` first generated `LaunchImage.png`,
   `LaunchImage@2x.png`, and `LaunchImage@3x.png` as 1x1 black placeholder
-  images.
-- `ios/Runner/Base.lproj/LaunchScreen.storyboard` had a `LaunchImage`
-  image view layered above `LaunchBackground`.
-- Because the placeholder image view was constrained to every screen edge, iOS
-  stretched that 1x1 black pixel over the real splash artwork, so the simulator
-  showed a black splash screen.
-- The storyboard was manually adjusted to remove the `LaunchImage` overlay and
-  render only `LaunchBackground` with `scaleAspectFill`.
+  images; those were replacing/covering the real splash artwork and caused a
+  black launch screen.
+- Per product direction, the temporary lightweight iOS launch screen using
+  solid `#1A417F` background plus centered logo was rolled back.
+- iOS native splash now renders the provided full splash PNG again through
+  `LaunchBackground` with `scaleAspectFill`.
+- Native iOS launch background image:
+
+```text
+ios/Runner/Assets.xcassets/LaunchBackground.imageset/background.png
+```
+
+- `LaunchLogo.imageset` was removed because it is no longer used by the
+  storyboard.
 - If `dart run flutter_native_splash:create` is run again, re-check
   `LaunchScreen.storyboard`; the generator may recreate the placeholder overlay.
 
@@ -1085,7 +1125,7 @@ Result:
 - First attempt exposed Gradle compatibility issues:
   - removed invalid standalone app-level `kotlin { compilerOptions { ... } }`
     block
-  - aligned Android Gradle Plugin to `8.12.1`
+  - aligned Android Gradle Plugin to `8.10.0`
   - aligned Kotlin Android Gradle plugin to `2.2.0`
 - Follow-up attempt stayed silent for several minutes and was manually
   interrupted with exit code `130`.

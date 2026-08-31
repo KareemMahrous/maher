@@ -30,6 +30,7 @@ dependencies:
   path_provider:
   record:
   wakelock_plus:
+  firebase_core:
 
 dev_dependencies:
   auto_route_generator:
