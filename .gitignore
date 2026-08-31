@@ -44,7 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-
 # mason
 mason.yaml
 .mason/
+
+# FVM Version Cache
+.fvm/
+.fvmrc
+.vscode/settings.json
