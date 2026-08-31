@@ -11,6 +11,7 @@ import '../../data/data.dart';
 import '../../domain/domain.dart';
 import '../cubit/cubit.dart';
 import '../services/google_auth_service.dart';
+import '../services/microsoft_auth_service.dart';
 import '../widget/widget.dart';
 
 @RoutePage()
@@ -22,7 +23,15 @@ class LoginView extends StatelessWidget {
     return BlocProvider(
       create: (_) => LoginByGoogleCubit(
         googleAuthService: GoogleAuthService(),
+        microsoftAuthService: MicrosoftAuthService(),
         loginByGoogleUseCase: LoginByGoogleUseCase(
+          authRepo: AuthRepoImpl(
+            remoteDataSource: AuthRemoteDataSourceImpl(
+              networkService: DioService(baseDio: BaseDio()),
+            ),
+          ),
+        ),
+        loginByMicrosoftUseCase: LoginByMicrosoftUseCase(
           authRepo: AuthRepoImpl(
             remoteDataSource: AuthRemoteDataSourceImpl(
               networkService: DioService(baseDio: BaseDio()),
@@ -95,7 +104,7 @@ class _LoginBody extends StatelessWidget {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: (constraints.maxHeight * 0.255).clamp(
+                              height: (constraints.maxHeight * 0.2).clamp(
                                 150.0,
                                 230.0,
                               ),
@@ -103,7 +112,9 @@ class _LoginBody extends StatelessWidget {
                             const _MaherLogo(),
                             const SizedBox(height: 46),
                             const LoginWithGoogle(),
-                            const SizedBox(height: 114),
+                            const SizedBox(height: 24),
+                            const LoginWithMicrosoft(),
+                            const SizedBox(height: 60),
                             const _CreateAccountText(),
                             const SizedBox(height: 270),
                           ],
@@ -157,7 +168,7 @@ class _CreateAccountText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         context.router.replace(const RecordMeetingViewRoute());
       },
       child: Text.rich(

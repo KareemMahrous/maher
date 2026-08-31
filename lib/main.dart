@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'core/core.dart';
 import 'core/routes/app_router.dart';
@@ -8,7 +9,8 @@ import 'core/routes/app_router.dart';
 Future<void> main() => bootstrap(Flavor.production);
 
 Future<void> bootstrap(Flavor flavor) async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   BuildConfig.setFlavor(flavor);
   await EasyLocalization.ensureInitialized();
   await SharedPref.instantiatePreferences();
@@ -22,6 +24,7 @@ Future<void> bootstrap(Flavor flavor) async {
       child: const MainApp(),
     ),
   );
+  FlutterNativeSplash.remove();
 }
 
 class MainApp extends StatelessWidget {

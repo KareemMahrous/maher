@@ -1,6 +1,7 @@
 class RemoteURLs {
   static const loginPath = 'login';
   static const loginByGoogle = 'login/loginByGoogle';
+  static const loginByMicrosoft = 'login/loginByMicrosoft';
   static const logoutPath = 'logout';
   static const refreshTokenPath = 'refreshToken';
 }

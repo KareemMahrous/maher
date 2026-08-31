@@ -10,7 +10,9 @@
       "noAccount": "ليس لديك حساب؟",
       "createAccount": "حساب جديد",
       "googleError": "تعذر تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى.",
-      "googleCanceled": "تم إلغاء تسجيل الدخول باستخدام Google."
+      "googleCanceled": "تم إلغاء تسجيل الدخول باستخدام Google.",
+      "microsoftError": "تعذر تسجيل الدخول باستخدام Microsoft. يرجى المحاولة مرة أخرى.",
+      "microsoftCanceled": "تم إلغاء تسجيل الدخول باستخدام Microsoft."
     }
   },
   "recordMeeting": {

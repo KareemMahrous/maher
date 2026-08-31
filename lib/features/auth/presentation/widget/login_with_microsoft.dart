@@ -5,8 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../cubit/cubit.dart';
 
-class LoginWithGoogle extends StatelessWidget {
-  const LoginWithGoogle({super.key});
+class LoginWithMicrosoft extends StatelessWidget {
+  const LoginWithMicrosoft({super.key});
 
   static const _brandColor = Color(0xFF0F2D5F);
   static const _buttonColor = Color(0xFFF2F5FA);
@@ -17,7 +17,7 @@ class LoginWithGoogle extends StatelessWidget {
       builder: (context, state) {
         final isLoading =
             state is LoginByGoogleLoading &&
-            state.provider == LoginProvider.google;
+            state.provider == LoginProvider.microsoft;
         final hasAnyLoading = state is LoginByGoogleLoading;
 
         return SizedBox(
@@ -32,9 +32,9 @@ class LoginWithGoogle extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               onTap: hasAnyLoading
                   ? null
-                  : context.read<LoginByGoogleCubit>().loginByGoogle,
+                  : context.read<LoginByGoogleCubit>().loginByMicrosoft,
               child: Padding(
-                padding: const EdgeInsetsDirectional.only(start: 22, end: 14),
+                padding: const EdgeInsetsDirectional.only(start: 22, end: 19),
                 child: Row(
                   children: [
                     isLoading
@@ -42,11 +42,11 @@ class LoginWithGoogle extends StatelessWidget {
                             dimension: 24,
                             child: CircularProgressIndicator(strokeWidth: 2.4),
                           )
-                        : const _GoogleMark(),
+                        : const _MicrosoftMark(),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'auth.login.googleButton'.tr(),
+                        'auth.login.microsoftButton'.tr(),
                         textAlign: TextAlign.start,
                         style: const TextStyle(
                           color: _brandColor,
@@ -67,11 +67,11 @@ class LoginWithGoogle extends StatelessWidget {
   }
 }
 
-class _GoogleMark extends StatelessWidget {
-  const _GoogleMark();
+class _MicrosoftMark extends StatelessWidget {
+  const _MicrosoftMark();
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset('assets/auth/google.svg', width: 32, height: 32);
+    return SvgPicture.asset('assets/auth/microsoft.svg', width: 32, height: 32);
   }
 }

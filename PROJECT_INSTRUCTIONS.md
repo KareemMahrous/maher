@@ -46,6 +46,7 @@ Current endpoint constants are intentionally minimal:
 
 ```dart
 RemoteURLs.loginByGoogle = 'login/loginByGoogle'
+RemoteURLs.loginByMicrosoft = 'login/loginByMicrosoft'
 ```
 
 `RemoteURLs.loginPath`, `logoutPath`, and `refreshTokenPath` are also kept
@@ -121,27 +122,33 @@ Current important files:
 ```text
 auth.dart
 config/auth_google_config.dart
+config/auth_microsoft_config.dart
 data/data.dart
 data/datasource/datasource.dart
 data/datasource/remote/auth_remote_datasource.dart
 data/datasource/remote_impl/auth_remote_datasource_impl.dart
 data/models/google_login_request_model.dart
+data/models/microsoft_login_request_model.dart
 data/models/models.dart
 data/repositories/auth_repo_impl.dart
 data/repositories/repositories.dart
 domain/domain.dart
 domain/entities/entities.dart
 domain/entities/google_login_request_entity.dart
+domain/entities/microsoft_login_request_entity.dart
 domain/repositories/auth_repo.dart
 domain/repositories/repositories.dart
 domain/usecases/login_by_google_use_case.dart
+domain/usecases/login_by_microsoft_use_case.dart
 domain/usecases/usecases.dart
 presentation/presentation.dart
 presentation/screens/auth_gate_view.dart
 presentation/screens/login_view.dart
 presentation/screens/screens.dart
 presentation/services/google_auth_service.dart
+presentation/services/microsoft_auth_service.dart
 presentation/widget/login_with_google.dart
+presentation/widget/login_with_microsoft.dart
 presentation/widget/widget.dart
 presentation/cubit/cubit.dart
 presentation/cubit/login_by_google_cubit.dart
@@ -173,6 +180,15 @@ SharedPref.getBoolean(PrefKeys.isUserLoggedIn) ?? false
   - sends the token payload to the backend via `LoginByGoogleUseCase`
   - sets `PrefKeys.isUserLoggedIn` to `true` only after backend success
   - emits success or localized error state
+- `LoginWithMicrosoft` calls `LoginByGoogleCubit.loginByMicrosoft()`.
+- `LoginByGoogleCubit.loginByMicrosoft()` now:
+  - emits loading for `LoginProvider.microsoft`
+  - starts interactive Microsoft authentication using `msal_auth`
+  - requests Microsoft Graph `user.read` scope
+  - sends the Microsoft token payload to the backend via
+    `LoginByMicrosoftUseCase`
+  - sets `PrefKeys.isUserLoggedIn` to `true` only after backend success
+  - emits success, canceled, or localized error state
 - On login success, `LoginView` navigates to `RecordMeetingViewRoute`.
 
 Current login UI:
@@ -195,9 +211,19 @@ assets/auth/login_pattern.png
 ```
 
 - `LoginWithGoogle` is a custom 56px rounded button with light background,
-  Arabic text, loading state, and a Google mark on the trailing side.
-- Microsoft login text/assets are intentionally not shown yet; only Google
-  login is implemented in this phase.
+  Arabic text, loading state, and the provided Google SVG logo:
+
+```text
+assets/auth/google.svg
+```
+
+- Microsoft login is now visible under Google using the same button dimensions
+  and styling direction, with the provided Microsoft SVG logo:
+
+```text
+assets/auth/microsoft.svg
+```
+
 - The signup line is localized:
   - `auth.login.noAccount`
   - `auth.login.createAccount`
@@ -208,10 +234,18 @@ Google Sign-In package:
 google_sign_in: 7.2.0
 ```
 
+Microsoft Sign-In package:
+
+```text
+msal_auth: 3.5.3
+```
+
 Auth config placeholders:
 
 ```text
 lib/features/auth/config/auth_google_config.dart
+lib/features/auth/config/auth_microsoft_config.dart
+assets/auth/msal_config.json
 ```
 
 Values to fill before real environment testing:
@@ -221,12 +255,16 @@ AuthGoogleConfig.clientId
 AuthGoogleConfig.serverClientId
 AuthGoogleConfig.backendApiKey
 AuthGoogleConfig.backendApiKeyHeaderName
+AuthMicrosoftConfig.clientId
+AuthMicrosoftConfig.androidRedirectUri
+AuthMicrosoftConfig.appleRedirectUri
 ```
 
 Backend endpoint:
 
 ```dart
 RemoteURLs.loginByGoogle = "login/loginByGoogle"
+RemoteURLs.loginByMicrosoft = "login/loginByMicrosoft"
 ```
 
 Backend request payload:
@@ -242,6 +280,22 @@ Backend request payload:
 }
 ```
 
+Microsoft backend request payload:
+
+```json
+{
+  "accessToken": "<microsoft-access-token>",
+  "idToken": "<optional-microsoft-id-token>",
+  "microsoftUserId": "<microsoft-account-id>",
+  "email": "<preferred-username-email>",
+  "displayName": "<account-name>",
+  "tenantId": "<optional-tenant-id>",
+  "authority": "<authority-url>",
+  "expiresOn": "<iso-8601-expiration>",
+  "scopes": ["https://graph.microsoft.com/user.read"]
+}
+```
+
 Important auth notes and risks:
 
 - Google Sign-In is implemented in app code, but real testing requires valid
@@ -253,10 +307,36 @@ Important auth notes and risks:
 - The backend endpoint example is now `login/loginByGoogle` under base URL
   `https://zk.com/`; update only `RemoteURLs.loginByGoogle` when the real path
   changes.
+- The Microsoft backend endpoint example is now `login/loginByMicrosoft` under
+  base URL `https://zk.com/`; update only `RemoteURLs.loginByMicrosoft` when
+  the real path changes.
 - If the backend requires a custom API key/header, fill
   `AuthGoogleConfig.backendApiKey` and `backendApiKeyHeaderName`.
 - The shared-pref login flag is written only after the backend accepts the
   Google token payload.
+- The same shared-pref login flag is written only after the backend accepts the
+  Microsoft token payload.
+
+Important Microsoft auth notes and risks:
+
+- Microsoft login uses `msal_auth` with `SingleAccountPca`.
+- `AuthMicrosoftConfig.broker` is currently `Broker.webView` so the app does
+  not require Microsoft Authenticator/keychain sharing in this phase.
+- Android MSAL config lives at `assets/auth/msal_config.json` and uses
+  `authorization_user_agent: WEBVIEW`.
+- Android now includes `INTERNET` and `ACCESS_NETWORK_STATE` permissions.
+- Before real testing, fill:
+  - Azure application client ID
+  - Android redirect URI from Azure
+  - iOS redirect URI if the final iOS setup requires an explicit redirect
+- `MicrosoftAuthService` validates the required placeholder values before
+  creating the native MSAL client, so missing config returns through the normal
+  localized Microsoft login error path instead of a lower-level native error.
+- The Microsoft package version added in this phase requires iOS 16+ through
+  CocoaPods. The project iOS deployment target was raised from `14.0` to
+  `16.0` in:
+  - `ios/Podfile`
+  - `ios/Runner.xcodeproj/project.pbxproj`
 
 ## Current Record Meeting Feature
 
@@ -382,6 +462,8 @@ wakelock_plus: 1.7.0
 flutter_bloc: 9.1.1
 equatable: 2.1.0
 dio: 5.11.0
+google_sign_in: 7.2.0
+msal_auth: 3.5.3
 get_it: 9.2.1
 dartz: 0.10.1
 ```
@@ -562,7 +644,7 @@ Native minimums required by the MP3 conversion package:
   `android/app/build.gradle.kts` unless the Android Kotlin plugin is also
   applied. A previous standalone Kotlin block caused Gradle script compilation
   errors during `flutter build apk --debug`.
-- iOS platform target `14.0`
+- iOS platform target `16.0`
 - Flutter Swift Package Manager integration is disabled for this project:
 
 ```yaml
@@ -573,15 +655,16 @@ flutter:
 
 - iOS dependencies are currently resolved through CocoaPods.
 - iOS must stay aligned in both:
-  - `ios/Podfile`: `platform :ios, '14.0'`
+  - `ios/Podfile`: `platform :ios, '16.0'`
   - `ios/Podfile` post-install hook: forces every Pods build configuration
-    `IPHONEOS_DEPLOYMENT_TARGET` to `14.0`
+    `IPHONEOS_DEPLOYMENT_TARGET` to `16.0`
   - `ios/Runner.xcodeproj/project.pbxproj`: all
     project-level, Runner target-level, and RunnerTests target-level
-    `IPHONEOS_DEPLOYMENT_TARGET` values set to `14.0`
+    `IPHONEOS_DEPLOYMENT_TARGET` values set to `16.0`
 
 This iOS target alignment is required because `FlutterFramework` requires at
-least iOS 13 and `ffmpeg-kit-flutter-new-audio` requires iOS 14.
+least iOS 13, `ffmpeg-kit-flutter-new-audio` requires iOS 14, and
+`msal_auth 3.5.3` requires iOS 16 through CocoaPods.
 
 Why SPM is disabled:
 
@@ -837,8 +920,9 @@ Package decision:
 - This project uses `flutter_native_splash ^2.4.7` because `2.4.8` requires
   `meta ^1.18.0`, while the current Flutter SDK pins `meta 1.17.0` through
   `flutter_test`.
-- The package is in `dev_dependencies` because it is only needed to generate
-  native launch assets.
+- The package is in `dependencies` because `main.dart` uses its runtime
+  `preserve()`/`remove()` API to prevent a black gap before Flutter's first
+  frame.
 
 Source image:
 
@@ -918,6 +1002,15 @@ iOS simulator black splash fix:
 - If `dart run flutter_native_splash:create` is run again, re-check
   `LaunchScreen.storyboard`; the generator may recreate the placeholder overlay.
 
+Black gap before Flutter first frame fix:
+
+- `main.dart` now calls `FlutterNativeSplash.preserve()` immediately after
+  `WidgetsFlutterBinding.ensureInitialized()`.
+- The splash is removed with `FlutterNativeSplash.remove()` only after
+  localization, shared preferences, foreground-task setup, and `runApp`.
+- This prevents iOS from briefly showing a black Flutter surface between the
+  OS launch storyboard and the first rendered Flutter frame.
+
 Generation command:
 
 ```bash
@@ -973,12 +1066,13 @@ No issues found!
 Latest successful iOS simulator build:
 
 ```text
-flutter build ios --simulator
+flutter build ios --simulator --target lib/main_development.dart
 ✓ Built build/ios/iphonesimulator/Runner.app
 ```
 
 This iOS simulator build was re-run successfully after native splash generation
-with `flutter_native_splash`, and again after adding `google_sign_in`.
+with `flutter_native_splash`, after adding `google_sign_in`, and after adding
+`msal_auth` plus the iOS 16 deployment target alignment.
 
 Latest Android debug build attempt:
 

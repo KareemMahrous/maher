@@ -29,6 +29,15 @@
 			<string>en</string>
 			<string>ar</string>
 		</array>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Maher needs microphone access to record offline meetings.</string>
 		<key>UIBackgroundModes</key>

@@ -10,7 +10,9 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
       "googleError": "Could not login with Google. Please try again.",
-      "googleCanceled": "Google login was canceled."
+      "googleCanceled": "Google login was canceled.",
+      "microsoftError": "Could not login with Microsoft. Please try again.",
+      "microsoftCanceled": "Microsoft login was canceled."
     }
   },
   "recordMeeting": {

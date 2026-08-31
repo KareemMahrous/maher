@@ -1,5 +1,7 @@
 part of 'login_by_google_cubit.dart';
 
+enum LoginProvider { google, microsoft }
+
 sealed class LoginByGoogleState extends Equatable {
   const LoginByGoogleState();
 
@@ -12,7 +14,12 @@ class LoginByGoogleInitial extends LoginByGoogleState {
 }
 
 class LoginByGoogleLoading extends LoginByGoogleState {
-  const LoginByGoogleLoading();
+  const LoginByGoogleLoading({required this.provider});
+
+  final LoginProvider provider;
+
+  @override
+  List<Object?> get props => [provider];
 }
 
 class LoginByGoogleSuccess extends LoginByGoogleState {
