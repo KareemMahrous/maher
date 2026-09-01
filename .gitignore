@@ -52,3 +52,4 @@ mason.yaml
 .fvm/
 .fvmrc
 .vscode/settings.json
+.vscode/launch.json

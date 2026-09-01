@@ -5,13 +5,16 @@ class AuthMicrosoftConfig {
 
   static const clientId = '313f1f6e-186a-44d2-9abe-bf79f2b31bfb';
 
-  // TODO: Add Android redirect URI from Azure, for example:
-  // msauth://com.maher.app/<BASE64_SIGNATURE_HASH>
-  static const androidRedirectUri = 'TODO_ADD_ANDROID_REDIRECT_URI';
+  static const tenantId = 'e73d5f51-e0f3-4c3b-aaeb-3ab18749df37';
 
-  // TODO: Add iOS redirect URI from Azure if needed, for example:
-  // msauth.<TEAM_ID>.com.maher.app://auth
-  static const appleRedirectUri = '';
+  static const authority = 'https://login.microsoftonline.com/$tenantId';
+
+  static const graphEndpoint = 'https://graph.microsoft.com/';
+
+  static const androidRedirectUri =
+      'msauth://com.maher.app/53F9T2Eb92l%2FQxDZ7WzGe4zQTAA%3D';
+
+  static const appleRedirectUri = 'msauth.com.maher.app://auth';
 
   static const androidConfigFilePath = 'assets/auth/msal_config.json';
 
@@ -19,7 +22,7 @@ class AuthMicrosoftConfig {
 
   static const broker = Broker.webView;
 
-  static const scopes = ['https://graph.microsoft.com/user.read'];
+  static const scopes = ['${graphEndpoint}user.read'];
 
   static String? get nullableAppleRedirectUri =>
       appleRedirectUri.isEmpty ? null : appleRedirectUri;

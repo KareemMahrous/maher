@@ -1,12 +1,13 @@
 {
-  "authorization_user_agent": "WEBVIEW",
+  "authorization_user_agent": "DEFAULT",
   "broker_redirect_uri_registered": false,
   "account_mode": "SINGLE",
   "authorities": [
     {
       "type": "AAD",
       "audience": {
-        "type": "AzureADandPersonalMicrosoftAccount"
+        "type": "AzureADMyOrg",
+        "tenant_id": "e73d5f51-e0f3-4c3b-aaeb-3ab18749df37"
       }
     }
   ]

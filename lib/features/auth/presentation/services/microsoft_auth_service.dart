@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:msal_auth/msal_auth.dart';
 
 import '../../config/auth_microsoft_config.dart';
@@ -9,23 +11,35 @@ class MicrosoftAuthService {
   SingleAccountPca? _publicClientApplication;
 
   Future<MicrosoftLoginRequestEntity> signIn() async {
-    final publicClientApplication = await _getPublicClientApplication();
-    final authResult = await publicClientApplication.acquireToken(
-      scopes: AuthMicrosoftConfig.scopes,
-      prompt: Prompt.selectAccount,
-    );
+    try {
+      final publicClientApplication = await _getPublicClientApplication();
+      final authResult = await publicClientApplication.acquireToken(
+        scopes: AuthMicrosoftConfig.scopes,
+        prompt: Prompt.selectAccount,
+      );
 
-    return MicrosoftLoginRequestEntity(
-      accessToken: authResult.accessToken,
-      idToken: authResult.idToken,
-      microsoftUserId: authResult.account.id,
-      email: authResult.account.username,
-      displayName: authResult.account.name,
-      tenantId: authResult.tenantId,
-      authority: authResult.authority,
-      expiresOn: authResult.expiresOn,
-      scopes: authResult.scopes,
-    );
+      return MicrosoftLoginRequestEntity(
+        accessToken: authResult.accessToken,
+        idToken: authResult.idToken,
+        microsoftUserId: authResult.account.id,
+        email: authResult.account.username,
+        displayName: authResult.account.name,
+        tenantId: authResult.tenantId,
+        authority: authResult.authority,
+        expiresOn: authResult.expiresOn,
+        scopes: authResult.scopes,
+      );
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        log(
+          'Microsoft sign-in failed.',
+          name: 'MicrosoftAuthService',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> signOut() async {
@@ -47,6 +61,7 @@ class MicrosoftAuthService {
         redirectUri: AuthMicrosoftConfig.androidRedirectUri,
       ),
       appleConfig: AppleConfig(
+        authority: AuthMicrosoftConfig.authority,
         authorityType: AuthMicrosoftConfig.authorityType,
         broker: AuthMicrosoftConfig.broker,
         redirectUri: AuthMicrosoftConfig.nullableAppleRedirectUri,

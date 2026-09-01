@@ -253,8 +253,6 @@ Values to fill before real environment testing:
 ```dart
 AuthGoogleConfig.backendApiKey
 AuthGoogleConfig.backendApiKeyHeaderName
-AuthMicrosoftConfig.androidRedirectUri
-AuthMicrosoftConfig.appleRedirectUri
 ```
 
 Configured Microsoft public client ID:
@@ -262,6 +260,18 @@ Configured Microsoft public client ID:
 ```text
 AuthMicrosoftConfig.clientId =
 313f1f6e-186a-44d2-9abe-bf79f2b31bfb
+
+AuthMicrosoftConfig.tenantId =
+e73d5f51-e0f3-4c3b-aaeb-3ab18749df37
+
+AuthMicrosoftConfig.authority =
+https://login.microsoftonline.com/e73d5f51-e0f3-4c3b-aaeb-3ab18749df37
+
+AuthMicrosoftConfig.appleRedirectUri =
+msauth.com.maher.app://auth
+
+AuthMicrosoftConfig.androidRedirectUri =
+msauth://com.maher.app/53F9T2Eb92l%2FQxDZ7WzGe4zQTAA%3D
 ```
 
 Microsoft Application secret:
@@ -366,14 +376,17 @@ Important auth notes and risks:
 Important Microsoft auth notes and risks:
 
 - Microsoft login uses `msal_auth` with `SingleAccountPca`.
-- `AuthMicrosoftConfig.broker` is currently `Broker.webView` so the app does
-  not require Microsoft Authenticator/keychain sharing in this phase.
+- `AuthMicrosoftConfig.broker` is currently `Broker.webView` on Apple
+  platforms, so the app does not require Microsoft Authenticator/keychain
+  sharing in this phase.
 - Android MSAL config lives at `assets/auth/msal_config.json` and uses
-  `authorization_user_agent: WEBVIEW`.
+  `authorization_user_agent: DEFAULT`, the tenant-specific `AzureADMyOrg`
+  audience, and single-account mode.
 - Android now includes `INTERNET` and `ACCESS_NETWORK_STATE` permissions.
-- Before real testing, fill:
-  - Android redirect URI from Azure
-  - iOS redirect URI if the final iOS setup requires an explicit redirect
+- Android registers MSAL's `BrowserTabActivity` for the configured package and
+  signing-certificate hash so browser redirects can return to the app.
+- iOS registers the `msauth.com.maher.app` URL scheme and passes the explicit
+  `msauth.com.maher.app://auth` redirect URI to MSAL.
 - `MicrosoftAuthService` validates the required placeholder values before
   creating the native MSAL client, so missing config returns through the normal
   localized Microsoft login error path instead of a lower-level native error.
@@ -1110,11 +1123,12 @@ For native recording/background changes, also validate Android/iOS builds on rea
 
 ## Verification Status
 
-Latest successful static check:
+Latest static check:
 
 ```text
 dart analyze
-No issues found!
+1 pre-existing warning in record_meeting_cubit.dart:
+unawaited_return_in_try_block
 ```
 
 Latest successful iOS simulator build:
@@ -1128,21 +1142,21 @@ This iOS simulator build was re-run successfully after native splash generation
 with `flutter_native_splash`, after adding `google_sign_in`, and after adding
 `msal_auth` plus the iOS 16 deployment target alignment.
 
-Latest Android debug build attempt:
+The latest iOS simulator verification attempt after configuring the Microsoft
+tenant authority and explicit redirect URI was blocked during `pod install`
+because the local CocoaPods specs repository did not contain
+`Firebase/CoreOnly 12.18.0`. Refresh the CocoaPods specs before rerunning it.
+
+Latest successful Android debug build:
 
 ```text
-flutter build apk --debug
+flutter build apk --debug --target lib/main_development.dart
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-Result:
+This Android build was completed after configuring the tenant-specific
+Microsoft authority, Android redirect URI, `BrowserTabActivity`, and DEFAULT
+MSAL authorization user agent.
 
-- First attempt exposed Gradle compatibility issues:
-  - removed invalid standalone app-level `kotlin { compilerOptions { ... } }`
-    block
-  - aligned Android Gradle Plugin to `8.10.0`
-  - aligned Kotlin Android Gradle plugin to `2.2.0`
-- Follow-up attempt stayed silent for several minutes and was manually
-  interrupted with exit code `130`.
-
-Static analysis passed, but a full Android native build/device test is still
-required before calling Android splash/background recording production-proven.
+Real Android and iOS device testing is still required before calling Microsoft
+login or splash/background recording production-proven.
